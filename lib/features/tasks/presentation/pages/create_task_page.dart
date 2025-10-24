@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_task_manager/features/tasks/domain/entities/task.dart';
+import 'package:smart_task_manager/features/tasks/presentation/pages/task_details_page.dart';
 import 'package:smart_task_manager/features/tasks/presentation/providers/create_task_notifier.dart';
 
 class CreateTaskPage extends ConsumerStatefulWidget {
@@ -40,12 +41,21 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
       await ref.read(createTaskNotifierProvider.notifier).createTask(task);
 
       final state = ref.read(createTaskNotifierProvider);
+      // If we have a created task with an ID, navigate to details page
       if (state is AsyncData<Task?> && state.value != null) {
-        // Return the created task to the caller
-        if (mounted) Navigator.of(context).pop(state.value);
-      } else {
-        if (mounted) Navigator.of(context).pop();
+        final created = state.value!;
+          if (created.id != null) {
+          if (mounted) {
+            await Navigator.of(context).pushReplacement(
+              TaskDetailsPage.route(context, created.id!),
+            );
+            return;
+          }
+        }
       }
+
+      // Fallback: just pop without result
+      if (mounted) Navigator.of(context).pop();
     } catch (e) {
       // Show error
       if (mounted) {

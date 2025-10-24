@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:smart_task_manager/features/tasks/domain/entities/task.dart';
 import 'package:smart_task_manager/features/tasks/domain/repositories/tasks_repository.dart';
 import 'package:smart_task_manager/features/tasks/presentation/pages/create_task_page.dart';
+import 'package:smart_task_manager/features/tasks/presentation/pages/task_details_page.dart';
 import 'package:smart_task_manager/features/tasks/presentation/providers/tasks_repository_provider.dart';
 
 import '../../../../helpers/helpers.dart';
@@ -21,8 +22,13 @@ void main() {
   testWidgets('CreateTaskPage submits and pops on success', (tester) async {
     final mockRepo = MockTasksRepository();
     const created = Task(id: 42, title: 'T', description: 'D');
+    when(() => mockRepo.createTask(any()))
+        .thenAnswer((_) async => created);
 
-    when(() => mockRepo.createTask(any())).thenAnswer((_) async => created);
+    // When the details page requests the task details, return the same
+    // created task (keeps line lengths under 80 chars).
+    when(() => mockRepo.getTaskDetails(created.id!))
+        .thenAnswer((_) async => created);
 
     await tester.pumpApp(
       ProviderScope(
@@ -39,7 +45,8 @@ void main() {
     await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
 
-    // After success the page should pop and be removed from the tree.
-    expect(find.byType(CreateTaskPage), findsNothing);
+    // After success the page should navigate to TaskDetailsPage
+    // (replacement).
+    expect(find.byType(TaskDetailsPage), findsOneWidget);
   });
 }

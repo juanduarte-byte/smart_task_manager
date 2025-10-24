@@ -5,6 +5,20 @@ import 'package:smart_task_manager/features/tasks/presentation/providers/task_de
 class TaskDetailsPage extends ConsumerWidget {
   const TaskDetailsPage({required this.taskId, super.key});
 
+  /// Convenience constructor to obtain a `Route` to this page.
+  ///
+  /// Accepts a [context] so we can reuse the existing ProviderContainer when
+  /// pushing the route (important for tests that override providers).
+  static Route<void> route(BuildContext context, int taskId) {
+    final parent = ProviderScope.containerOf(context);
+    return MaterialPageRoute<void>(
+      builder: (_) => UncontrolledProviderScope(
+        container: parent,
+        child: TaskDetailsPage(taskId: taskId),
+      ),
+    );
+  }
+
   final int taskId;
 
   @override
