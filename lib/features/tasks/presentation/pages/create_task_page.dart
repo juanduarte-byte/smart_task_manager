@@ -49,9 +49,9 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
     } catch (e) {
       // Show error
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al crear la tarea: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al crear la tarea: $e')));
       }
     }
   }
@@ -71,9 +71,9 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
         },
         error: (err, st) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: $err')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Error: $err')));
           }
         },
       );

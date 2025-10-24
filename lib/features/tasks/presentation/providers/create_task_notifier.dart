@@ -25,7 +25,7 @@ class CreateTaskNotifier extends StateNotifier<AsyncValue<Task?>> {
   }
 }
 
-final createTaskNotifierProvider = StateNotifierProvider<CreateTaskNotifier,
-    AsyncValue<Task?>>(
-  (ref) => CreateTaskNotifier(ref.read(tasksRepositoryProvider)),
-);
+final createTaskNotifierProvider =
+    StateNotifierProvider<CreateTaskNotifier, AsyncValue<Task?>>(
+      (ref) => CreateTaskNotifier(ref.read(tasksRepositoryProvider)),
+    );

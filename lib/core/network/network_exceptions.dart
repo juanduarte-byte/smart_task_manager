@@ -1,4 +1,3 @@
-
 // ignore_for_file: eol_at_end_of_file
 
 import 'package:dio/dio.dart';
@@ -21,13 +20,9 @@ class NetworkException implements Exception {
       case DioExceptionType.cancel:
         return NetworkException('Solicitud cancelada.');
       case DioExceptionType.connectionError:
-        return NetworkException(
-          'Sin conexión a internet. Intenta nuevamente.',
-        );
+        return NetworkException('Sin conexión a internet. Intenta nuevamente.');
       case DioExceptionType.unknown:
-        return NetworkException(
-          'Error desconocido: ${dioError.message}',
-        );
+        return NetworkException('Error desconocido: ${dioError.message}');
       case DioExceptionType.badCertificate:
         return NetworkException('Error de certificado.');
     }
@@ -61,6 +56,3 @@ class NetworkException implements Exception {
 }
 
 // EOF
-
-
-

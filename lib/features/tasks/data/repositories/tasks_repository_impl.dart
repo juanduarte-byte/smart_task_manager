@@ -20,8 +20,9 @@ class TasksRepositoryImpl implements TasksRepository {
         completed: task.completed,
       );
 
-      final createdTaskModel =
-          await _remoteDataSource.createTask(taskModelToSend);
+      final createdTaskModel = await _remoteDataSource.createTask(
+        taskModelToSend,
+      );
 
       return Task(
         id: createdTaskModel.id,
@@ -32,8 +33,7 @@ class TasksRepositoryImpl implements TasksRepository {
     } on NetworkException {
       rethrow;
     } catch (e) {
-      throw NetworkException(
-          'Fallo al crear la tarea: $e');
+      throw NetworkException('Fallo al crear la tarea: $e');
     }
   }
 
@@ -51,8 +51,7 @@ class TasksRepositoryImpl implements TasksRepository {
     } on NetworkException {
       rethrow;
     } catch (e) {
-      throw NetworkException(
-          'Fallo al obtener los detalles de la tarea: $e');
+      throw NetworkException('Fallo al obtener los detalles de la tarea: $e');
     }
   }
 } // <- Asegúrate de que haya una línea en blanco después de esta llave

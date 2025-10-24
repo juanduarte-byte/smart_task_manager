@@ -9,7 +9,6 @@ import 'package:smart_task_manager/features/tasks/presentation/providers/tasks_r
 
 import '../../../../helpers/helpers.dart';
 
-
 class MockTasksRepository extends Mock implements TasksRepository {}
 
 class FakeTask extends Fake implements Task {}
@@ -23,15 +22,11 @@ void main() {
     final mockRepo = MockTasksRepository();
     const created = Task(id: 42, title: 'T', description: 'D');
 
-    when(
-      () => mockRepo.createTask(any()),
-    ).thenAnswer((_) async => created);
+    when(() => mockRepo.createTask(any())).thenAnswer((_) async => created);
 
     await tester.pumpApp(
       ProviderScope(
-        overrides: [
-          tasksRepositoryProvider.overrideWithValue(mockRepo),
-        ],
+        overrides: [tasksRepositoryProvider.overrideWithValue(mockRepo)],
         child: const CreateTaskPage(),
       ),
     );
@@ -44,7 +39,7 @@ void main() {
     await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
 
-  // After success the page should pop and be removed from the tree.
-  expect(find.byType(CreateTaskPage), findsNothing);
+    // After success the page should pop and be removed from the tree.
+    expect(find.byType(CreateTaskPage), findsNothing);
   });
 }
