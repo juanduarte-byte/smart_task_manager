@@ -1,0 +1,85 @@
+// --- CAMBIO: Usar import de paquete y ordenar ---
+import 'package:smart_task_manager/core/network/dio_client.dart';
+import 'package:smart_task_manager/features/tasks/data/models/task_model.dart';
+
+/// Maneja las llamadas a la API remota para las tareas.
+class TasksRemoteDataSource {
+  // --- CAMBIO: Constructor primero ---
+  TasksRemoteDataSource(this._dioClient);
+
+  final DioClient _dioClient;
+
+  /// POST: Crea una nueva tarea en el servidor.
+  ///
+  /// Usa el endpoint /posts de JSONPlaceholder como simulación.
+  Future<TaskModel> createTask(TaskModel task) async {
+    // --- CAMBIO: Usar final en lugar de Map<String, dynamic> ---
+    final taskJson = task.toJson();
+    // JSONPlaceholder espera 'body' en lugar de 'description'
+    taskJson['body'] = taskJson.remove('description');
+    // JSONPlaceholder también espera 'userId', añadimos uno por defecto
+    taskJson['userId'] = 1;
+
+    // --- CAMBIO: Usar final en lugar de Response<dynamic> ---
+    final response = await _dioClient.post(
+      '/posts', // Endpoint para crear posts (simulando tareas)
+      data: taskJson,
+    );
+
+    // --- CAMBIO: Verificar tipo antes de usar y hacer cast ---
+    if (response.data is Map<String, dynamic>) {
+      // La API devuelve el objeto creado con su nuevo ID.
+      // Mapeamos 'body' de vuelta a 'description' para nuestro modelo.
+      final responseData = Map<String, dynamic>.from(
+        response.data as Map,
+      ); // Cast explícito
+      responseData['description'] = responseData.remove('body');
+      return TaskModel.fromJson(responseData);
+    } else {
+      throw Exception('Formato de respuesta inesperado al crear tarea');
+    }
+  }
+
+  /// GET: Obtiene los detalles de una tarea específica por su ID.
+  Future<TaskModel> getTaskDetails(int taskId) async {
+    // --- CAMBIO: Usar final en lugar de Response<dynamic> ---
+    final response = await _dioClient.get('/posts/$taskId');
+
+    // --- CAMBIO: Verificar tipo antes de usar y hacer cast ---
+    if (response.data is Map<String, dynamic>) {
+      // Mapeamos 'body' de vuelta a 'description' para nuestro modelo.
+      final responseData = Map<String, dynamic>.from(
+        response.data as Map,
+      ); // Cast explícito
+      responseData['description'] = responseData.remove('body');
+      return TaskModel.fromJson(responseData);
+    } else {
+      throw Exception(
+        'Formato de respuesta inesperado al obtener detalles de tarea',
+      );
+    }
+  }
+
+  /// GET: Obtiene todas las tareas (simulado con /posts).
+  Future<List<TaskModel>> getAllTasks() async {
+    // --- CAMBIO: Usar final en lugar de Response<dynamic> ---
+    final response = await _dioClient.get('/posts');
+
+    // --- CAMBIO: Verificar tipo antes de usar y hacer cast ---
+    if (response.data is List) {
+      // Cast explícito a List<dynamic>
+      final responseList = response.data as List;
+      return responseList.map((json) {
+        // Mapeamos 'body' de vuelta a 'description' para nuestro modelo.
+        // --- CAMBIO: Cast explícito a Map<String, dynamic> ---
+        final mapData = Map<String, dynamic>.from(json as Map);
+        mapData['description'] = mapData.remove('body');
+        return TaskModel.fromJson(mapData);
+      }).toList();
+    } else {
+      throw Exception(
+        'Formato de respuesta inesperado al obtener todas las tareas',
+      );
+    }
+  }
+}
