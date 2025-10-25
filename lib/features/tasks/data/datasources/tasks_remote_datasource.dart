@@ -85,7 +85,9 @@ class TasksRemoteDataSource {
     // Map 'description' back to 'body' for JSONPlaceholder
     taskJson['body'] = taskJson.remove('description');
 
-    final response = await _dioClient.put('/posts/${task.id}', data: taskJson);
+  // Use PATCH instead of PUT to update partial fields. JSONPlaceholder
+  // accepts PATCH for partial updates and is often more tolerant.
+  final response = await _dioClient.patch('/posts/${task.id}', data: taskJson);
 
     if (response.data is Map<String, dynamic>) {
       final responseData = Map<String, dynamic>.from(response.data as Map);

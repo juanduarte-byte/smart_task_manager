@@ -96,15 +96,18 @@ class TasksRepositoryImpl implements TasksRepository {
 
   @override
   Future<Task> updateTask(Task task) async {
-    try {
-      final taskModelToSend = TaskModel(
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        completed: task.completed,
-      );
+    final taskModelToSend = TaskModel(
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      completed: task.completed,
+    );
 
+    try {
       final updatedModel = await _remoteDataSource.updateTask(taskModelToSend);
+
+      // Update cache with fresh data
+      await _local?.updateCachedTask(updatedModel);
 
       return Task(
         id: updatedModel.id,
@@ -113,7 +116,16 @@ class TasksRepositoryImpl implements TasksRepository {
         completed: updatedModel.completed,
       );
     } on NetworkException {
-      rethrow;
+      // Remote update failed (server error). Fallback to updating local cache
+      // so the user sees their change locally and the app remains usable.
+      await _local?.updateCachedTask(taskModelToSend);
+
+      return Task(
+        id: taskModelToSend.id,
+        title: taskModelToSend.title,
+        description: taskModelToSend.description,
+        completed: taskModelToSend.completed,
+      );
     } catch (e) {
       throw NetworkException('Fallo al actualizar la tarea: $e');
     }

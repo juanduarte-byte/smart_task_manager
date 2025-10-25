@@ -123,4 +123,12 @@ class DioClient {
       throw NetworkException.fromDioError(e);
     }
   }
+
+  Future<Response<dynamic>> patch(String path, {required Map<String, dynamic> data}) async {
+    try {
+      return await _withRetry<Response<dynamic>>(() => _dio.patch<dynamic>(path, data: data));
+    } on DioException catch (e) {
+      throw NetworkException.fromDioError(e);
+    }
+  }
 }

@@ -100,7 +100,7 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
 
   @override
   Widget build(BuildContext context) {
-    final createState = ref.watch(createTaskNotifierProvider);
+  final createState = ref.watch(createTaskNotifierProvider);
 
     ref.listen<AsyncValue<Task?>>(createTaskNotifierProvider, (previous, next) {
       next.whenOrNull(
@@ -116,6 +116,26 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text('Error: $err')));
+          }
+        },
+      );
+    });
+
+    // Listen for update results and show feedback
+    ref.listen<AsyncValue<Task?>>(updateTaskNotifierProvider, (previous, next) {
+      next.whenOrNull(
+        data: (task) {
+          if (task != null && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Tarea actualizada correctamente')),
+            );
+          }
+        },
+        error: (err, st) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error al actualizar: $err')),
+            );
           }
         },
       );
