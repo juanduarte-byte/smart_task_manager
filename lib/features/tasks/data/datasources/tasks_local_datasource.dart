@@ -12,7 +12,14 @@ class TasksLocalDataSource {
 
   Box<dynamic> get _box => Hive.box<dynamic>(boxName);
 
+  Future<void> _ensureBoxOpen() async {
+    if (!Hive.isBoxOpen(boxName)) {
+      await Hive.openBox<dynamic>(boxName);
+    }
+  }
+
   Future<void> cacheTasks(List<TaskModel> tasks) async {
+    await _ensureBoxOpen();
     final map = <String, dynamic>{};
     for (final t in tasks) {
       if (t.id != null) map[t.id!.toString()] = t.toJson();
@@ -21,6 +28,7 @@ class TasksLocalDataSource {
   }
 
   Future<List<TaskModel>> getCachedTasks() async {
+    await _ensureBoxOpen();
     final values = _box.toMap().values;
     final list = values.map((e) {
       final json = Map<String, dynamic>.from(e as Map<String, dynamic>);
@@ -31,15 +39,18 @@ class TasksLocalDataSource {
 
   Future<void> cacheTask(TaskModel task) async {
     if (task.id == null) return;
+    await _ensureBoxOpen();
     await _box.put(task.id!.toString(), task.toJson());
   }
 
   Future<void> updateCachedTask(TaskModel task) async {
     if (task.id == null) return;
+    await _ensureBoxOpen();
     await _box.put(task.id!.toString(), task.toJson());
   }
 
   Future<void> deleteCachedTask(int id) async {
+    await _ensureBoxOpen();
     await _box.delete(id.toString());
   }
 }
