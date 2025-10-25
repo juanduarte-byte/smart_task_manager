@@ -75,26 +75,51 @@ class TasksRemoteDataSource {
     );
   }
 
-  /// GET: Obtiene todas las tareas (simulado con /posts).
-  Future<List<TaskModel>> getAllTasks() async {
-    // --- CAMBIO: Usar final en lugar de Response<dynamic> ---
-    final response = await _dioClient.get('/posts');
+  /// PUT: Actualiza una tarea existente en el servidor simulado.
+  Future<TaskModel> updateTask(TaskModel task) async {
+    if (task.id == null) {
+      throw Exception('Task id is required for update');
+    }
 
-    // --- CAMBIO: Verificar tipo antes de usar y hacer cast ---
+    final taskJson = task.toJson();
+    // Map 'description' back to 'body' for JSONPlaceholder
+    taskJson['body'] = taskJson.remove('description');
+
+    final response = await _dioClient.put('/posts/${task.id}', data: taskJson);
+
+    if (response.data is Map<String, dynamic>) {
+      final responseData = Map<String, dynamic>.from(response.data as Map);
+      responseData['description'] = responseData.remove('body');
+      return TaskModel.fromJson(responseData);
+    }
+
+    throw Exception('Formato de respuesta inesperado al actualizar tarea');
+  }
+
+  /// GET: Obtiene una página de tareas (simulado con /posts).
+  /// Usa los parámetros `_start` y `_limit` de JSONPlaceholder para
+  /// paginar resultados. `page` es 0-based.
+  Future<List<TaskModel>> getAllTasks({int page = 0, int pageSize = 10}) async {
+    final start = page * pageSize;
+    final response = await _dioClient.get(
+      '/posts',
+      queryParams: {
+        '_start': start,
+        '_limit': pageSize,
+      },
+    );
+
     if (response.data is List) {
-      // Cast explícito a List<dynamic>
       final responseList = response.data as List;
       return responseList.map((json) {
-        // Mapeamos 'body' de vuelta a 'description' para nuestro modelo.
-        // --- CAMBIO: Cast explícito a Map<String, dynamic> ---
         final mapData = Map<String, dynamic>.from(json as Map);
         mapData['description'] = mapData.remove('body');
         return TaskModel.fromJson(mapData);
       }).toList();
-    } else {
-      throw Exception(
-        'Formato de respuesta inesperado al obtener todas las tareas',
-      );
     }
+
+    throw Exception(
+      'Formato de respuesta inesperado al obtener todas las tareas',
+    );
   }
 }

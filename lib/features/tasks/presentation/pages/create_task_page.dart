@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_task_manager/features/tasks/domain/entities/task.dart';
 import 'package:smart_task_manager/features/tasks/presentation/pages/task_details_page.dart';
 import 'package:smart_task_manager/features/tasks/presentation/providers/create_task_notifier.dart';
+import 'package:smart_task_manager/features/tasks/presentation/providers/update_task_notifier.dart';
 
 class CreateTaskPage extends ConsumerStatefulWidget {
-  const CreateTaskPage({super.key});
+  const CreateTaskPage({super.key, this.initialTask});
 
-  static Route<void> route() {
-    return MaterialPageRoute<void>(builder: (_) => const CreateTaskPage());
+  final Task? initialTask;
+
+  static Route<void> route(BuildContext context, {Task? initialTask}) {
+    return MaterialPageRoute<void>(builder: (_) => CreateTaskPage(initialTask: initialTask));
   }
 
   @override
@@ -21,6 +24,19 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
   final _descriptionController = TextEditingController();
   bool _completed = false;
 
+  bool get isEditing => widget.initialTask != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (isEditing) {
+      final t = widget.initialTask!;
+      _titleController.text = t.title;
+      _descriptionController.text = t.description;
+      _completed = t.completed;
+    }
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -32,24 +48,40 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
     if (!_formKey.currentState!.validate()) return;
 
     final task = Task(
+      id: widget.initialTask?.id,
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       completed: _completed,
     );
 
     try {
-      await ref.read(createTaskNotifierProvider.notifier).createTask(task);
+      if (isEditing) {
+        await ref.read(updateTaskNotifierProvider.notifier).updateTask(task);
 
-      final state = ref.read(createTaskNotifierProvider);
-      // If we have a created task with an ID, navigate to details page
-      if (state is AsyncData<Task?> && state.value != null) {
-        final created = state.value!;
-          if (created.id != null) {
+        final state = ref.read(updateTaskNotifierProvider);
+        if (state is AsyncData<Task?> && state.value != null) {
+          final updated = state.value!;
           if (mounted) {
             await Navigator.of(context).pushReplacement(
-              TaskDetailsPage.route(context, created.id!),
+              TaskDetailsPage.route(context, updated.id!),
             );
             return;
+          }
+        }
+      } else {
+        await ref.read(createTaskNotifierProvider.notifier).createTask(task);
+
+        final state = ref.read(createTaskNotifierProvider);
+        // If we have a created task with an ID, navigate to details page
+        if (state is AsyncData<Task?> && state.value != null) {
+          final created = state.value!;
+          if (created.id != null) {
+            if (mounted) {
+              await Navigator.of(context).pushReplacement(
+                TaskDetailsPage.route(context, created.id!),
+              );
+              return;
+            }
           }
         }
       }
@@ -90,7 +122,7 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Crear tarea')),
+      appBar: AppBar(title: Text(isEditing ? 'Editar tarea' : 'Crear tarea')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -135,7 +167,7 @@ class _CreateTaskPageState extends ConsumerState<CreateTaskPage> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Crear tarea'),
+                    : Text(isEditing ? 'Actualizar tarea' : 'Crear tarea'),
               ),
             ],
           ),

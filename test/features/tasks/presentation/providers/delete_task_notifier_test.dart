@@ -1,6 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_task_manager/features/tasks/domain/repositories/tasks_repository.dart';
 import 'package:smart_task_manager/features/tasks/presentation/providers/delete_task_notifier.dart';
 

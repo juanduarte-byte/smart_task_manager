@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_task_manager/features/tasks/presentation/pages/create_task_page.dart';
 import 'package:smart_task_manager/features/tasks/presentation/providers/delete_task_notifier.dart';
 import 'package:smart_task_manager/features/tasks/presentation/providers/task_details_provider.dart';
 
@@ -31,6 +32,22 @@ class TaskDetailsPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Detalles de la Tarea'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () async {
+              // Open create page in edit mode
+              final task = ref.read(taskDetailsProvider(taskId)).maybeWhen(
+                    data: (t) => t,
+                    orElse: () => null,
+                  );
+              if (task != null) {
+                await Navigator.of(context).push(
+                  CreateTaskPage.route(context, initialTask: task),
+                );
+                return;
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () async {

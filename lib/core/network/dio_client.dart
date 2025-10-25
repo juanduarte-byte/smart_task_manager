@@ -32,14 +32,19 @@ class DioClient {
       },
       onResponse: (response, handler) {
         // ignore: avoid_print
-        print('✅ RESPONSE[${response.statusCode}] => DATA: ${response.data}');
+        // Print status and data in two prints to avoid long single-line issues.
+        // ignore: avoid_print
+        print('✅ RESPONSE[${response.statusCode}] =>');
+        // ignore: avoid_print
+        print('DATA: ${response.data}');
         return handler.next(response);
       },
       onError: (DioException error, handler) {
         // ignore: avoid_print
-        print(
-          '❌ ERROR[${error.response?.statusCode}] => MESSAGE: ${error.message}',
-        );
+        // ignore: avoid_print
+        print('❌ ERROR[${error.response?.statusCode}] =>');
+        // ignore: avoid_print
+        print('MESSAGE: ${error.message}');
         return handler.next(error);
       },
     );
@@ -75,6 +80,15 @@ class DioClient {
   Future<Response<dynamic>> delete(String path) async {
     try {
       final response = await _dio.delete<dynamic>(path);
+      return response;
+    } on DioException catch (e) {
+      throw NetworkException.fromDioError(e);
+    }
+  }
+
+  Future<Response<dynamic>> put(String path, {required Map<String, dynamic> data}) async {
+    try {
+      final response = await _dio.put<dynamic>(path, data: data);
       return response;
     } on DioException catch (e) {
       throw NetworkException.fromDioError(e);

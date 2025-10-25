@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_task_manager/features/tasks/domain/entities/task.dart';
 import 'package:smart_task_manager/features/tasks/domain/repositories/tasks_repository.dart';
 import 'package:smart_task_manager/features/tasks/presentation/pages/task_details_page.dart';
@@ -21,30 +21,25 @@ void main() {
     const taskId = 42;
 
     // Provide a fake task for the details provider to consume
-    final task = Task(
+    const task = Task(
       id: taskId,
       title: 'Test',
       description: 'desc',
-      completed: false,
     );
 
     when(() => mockRepo.getTaskDetails(taskId))
         .thenAnswer((_) async => task);
     when(() => mockRepo.deleteTask(taskId)).thenAnswer((_) async {});
 
-    // Override the repository provider so providers use our mock
-    final container = ProviderContainer(overrides: [
-      tasksRepositoryProvider.overrideWithValue(mockRepo),
-    ]);
-
-    await tester.pumpWidget(
-      ProviderScope(
-        parent: container,
-        child: MaterialApp(
-          home: TaskDetailsPage(taskId: taskId),
-        ),
-      ),
-    );
+        // Override the repository provider so providers use our mock.
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [tasksRepositoryProvider.overrideWithValue(mockRepo)],
+            child: const MaterialApp(
+              home: TaskDetailsPage(taskId: taskId),
+            ),
+          ),
+        );
 
     // Ensure details are shown
     await tester.pumpAndSettle();

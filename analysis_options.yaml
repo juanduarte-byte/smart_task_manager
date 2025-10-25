@@ -5,3 +5,9 @@ analyzer:
 linter:
   rules:
     public_member_api_docs: false
+    # The project prefers slightly longer lines in places (generated code,
+    # long JSON mappings, etc.). Disable the strict 80-char rule to reduce
+    # noisy info-level diagnostics in the editor. We keep other very_good
+    # rules enabled via the included package.
+    lines_longer_than_80_chars: false
+
