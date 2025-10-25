@@ -50,16 +50,46 @@ class DioClient {
     );
   }
 
+  /// Runs [action] with a simple retry policy for transient errors.
+  /// Retries up to [maxRetries] times with exponential backoff (in ms).
+  Future<T> _withRetry<T>(
+    Future<T> Function() action, {
+    int maxRetries = 2,
+    int backoffMillis = 200,
+  }) async {
+    var attempt = 0;
+    while (true) {
+      try {
+        return await action();
+      } on DioException catch (e) {
+        attempt++;
+        // Don't retry on client errors (4xx) or if we've exhausted retries.
+        final status = e.response?.statusCode;
+        final isClientError = status != null && status >= 400 && status < 500;
+        final shouldRetry = !isClientError && attempt <= maxRetries;
+        if (!shouldRetry) {
+          throw NetworkException.fromDioError(e);
+        }
+
+        // Backoff before next retry
+        final delay = backoffMillis * (1 << (attempt - 1));
+        // ignore: avoid_print
+        print('⏳ Retry attempt $attempt after ${delay}ms due to ${e.message}');
+        await Future<void>.delayed(Duration(milliseconds: delay));
+        // loop and retry
+      }
+    }
+  }
+
   Future<Response<dynamic>> get(
     String path, {
     Map<String, dynamic>? queryParams,
   }) async {
     try {
-      final response = await _dio.get<dynamic>(
-        path,
-        queryParameters: queryParams,
-      );
-      return response;
+      return await _withRetry<Response<dynamic>>(() => _dio.get<dynamic>(
+            path,
+            queryParameters: queryParams,
+          ));
     } on DioException catch (e) {
       throw NetworkException.fromDioError(e);
     }
@@ -70,8 +100,9 @@ class DioClient {
     required Map<String, dynamic> data,
   }) async {
     try {
-      final response = await _dio.post<dynamic>(path, data: data);
-      return response;
+      return await _withRetry<Response<dynamic>>(
+        () => _dio.post<dynamic>(path, data: data),
+      );
     } on DioException catch (e) {
       throw NetworkException.fromDioError(e);
     }
@@ -79,8 +110,7 @@ class DioClient {
 
   Future<Response<dynamic>> delete(String path) async {
     try {
-      final response = await _dio.delete<dynamic>(path);
-      return response;
+      return await _withRetry<Response<dynamic>>(() => _dio.delete<dynamic>(path));
     } on DioException catch (e) {
       throw NetworkException.fromDioError(e);
     }
@@ -88,8 +118,7 @@ class DioClient {
 
   Future<Response<dynamic>> put(String path, {required Map<String, dynamic> data}) async {
     try {
-      final response = await _dio.put<dynamic>(path, data: data);
-      return response;
+      return await _withRetry<Response<dynamic>>(() => _dio.put<dynamic>(path, data: data));
     } on DioException catch (e) {
       throw NetworkException.fromDioError(e);
     }
