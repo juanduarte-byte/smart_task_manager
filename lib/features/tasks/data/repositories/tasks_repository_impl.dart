@@ -54,4 +54,16 @@ class TasksRepositoryImpl implements TasksRepository {
       throw NetworkException('Fallo al obtener los detalles de la tarea: $e');
     }
   }
+
+  @override
+  Future<void> deleteTask(int id) async {
+    try {
+      await _remoteDataSource.deleteTask(id);
+      return;
+    } on NetworkException {
+      rethrow;
+    } catch (e) {
+      throw NetworkException('Fallo al eliminar la tarea: $e');
+    }
+  }
 } // <- Asegúrate de que haya una línea en blanco después de esta llave

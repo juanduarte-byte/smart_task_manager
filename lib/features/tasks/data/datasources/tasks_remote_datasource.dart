@@ -60,6 +60,21 @@ class TasksRemoteDataSource {
     }
   }
 
+  /// DELETE: Elimina una tarea por su ID en el servidor simulado.
+  Future<void> deleteTask(int taskId) async {
+    final response = await _dioClient.delete('/posts/$taskId');
+
+  // JSONPlaceholder suele devolver 200 o 204.
+  // Si ocurre un error, Dio lanzará y será mapeado por DioClient.
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return;
+    }
+
+    throw Exception(
+      'Fallo al eliminar la tarea: ${response.statusCode}',
+    );
+  }
+
   /// GET: Obtiene todas las tareas (simulado con /posts).
   Future<List<TaskModel>> getAllTasks() async {
     // --- CAMBIO: Usar final en lugar de Response<dynamic> ---

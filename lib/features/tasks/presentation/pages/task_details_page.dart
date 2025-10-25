@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_task_manager/features/tasks/presentation/providers/delete_task_notifier.dart';
 import 'package:smart_task_manager/features/tasks/presentation/providers/task_details_provider.dart';
 
 class TaskDetailsPage extends ConsumerWidget {
@@ -27,7 +28,56 @@ class TaskDetailsPage extends ConsumerWidget {
     final taskAsyncValue = ref.watch(taskDetailsProvider(taskId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detalles de la Tarea')),
+      appBar: AppBar(
+        title: const Text('Detalles de la Tarea'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Confirmar'),
+          content: const Text(
+            '¿Estás seguro que quieres eliminar\nesta tarea?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                      child: const Text('Cancelar'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      child: const Text('Eliminar'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirmed != true) return;
+
+              // Ejecuta el borrado usando el notifier
+              try {
+                await ref
+                    .read(deleteTaskNotifierProvider.notifier)
+                    .deleteTask(taskId);
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Tarea eliminada')),
+                  );
+                  Navigator.of(context).pop();
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error al eliminar: $e')),
+                  );
+                }
+              }
+            },
+          ),
+        ],
+      ),
       body: Center(
         // AsyncValue tiene helpers .when para manejar los estados
         child: taskAsyncValue.when(

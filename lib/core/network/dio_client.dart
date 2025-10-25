@@ -71,4 +71,13 @@ class DioClient {
       throw NetworkException.fromDioError(e);
     }
   }
+
+  Future<Response<dynamic>> delete(String path) async {
+    try {
+      final response = await _dio.delete<dynamic>(path);
+      return response;
+    } on DioException catch (e) {
+      throw NetworkException.fromDioError(e);
+    }
+  }
 }
