@@ -21,7 +21,8 @@ class App extends StatelessWidget {
         ),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const CreateTaskPage(), // La página de inicio sigue siendo CreateTaskPage
+        // La página de inicio sigue siendo CreateTaskPage
+        home: const CreateTaskPage(),
       ),
     );
   }

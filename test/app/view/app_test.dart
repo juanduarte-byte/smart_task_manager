@@ -3,13 +3,13 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_task_manager/app/app.dart';
-import 'package:smart_task_manager/counter/counter.dart';
+import 'package:smart_task_manager/features/tasks/presentation/pages/create_task_page.dart';
 
 void main() {
   group('App', () {
-    testWidgets('renders CounterPage', (tester) async {
+    testWidgets('renders CreateTaskPage', (tester) async {
       await tester.pumpWidget(App());
-      expect(find.byType(CounterPage), findsOneWidget);
+      expect(find.byType(CreateTaskPage), findsOneWidget);
     });
   });
 }
