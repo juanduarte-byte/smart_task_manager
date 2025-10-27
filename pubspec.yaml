@@ -8,12 +8,12 @@ environment:
   flutter: ^3.35.0
 
 dependencies:
-  bloc: ^8.1.4
+  bloc: ^9.1.0
   dio: ^5.4.3+1
   equatable: ^2.0.5
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.1.5
+  flutter_bloc: ^9.1.1
   flutter_localizations:
     sdk: flutter
   flutter_native_splash: ^2.4.7
@@ -26,7 +26,7 @@ dependencies:
   json_annotation: ^4.9.0
 
 dev_dependencies:
-  bloc_test: ^9.1.7
+  bloc_test: ^10.0.0
   build_runner: ^2.4.11
   flutter_launcher_icons: ^0.14.4
   flutter_test:
